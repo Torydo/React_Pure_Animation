@@ -1,9 +1,31 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Slideshow from './Slider';
+
+// import Slider from './Slider';
+// import './slider.css';
+import { Slide } from 'react-slideshow-image';
+import 'react-slideshow-image/dist/styles.css'
+ 
+const slideImages = [
+  'https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide1_.jpg',
+  'https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide2_.jpg',
+  'https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide3_.jpg'
+];
 
 const marginTop = 50, rightA = 100, restLeft = -89, restTop = 47;
 const matA = 0.86603, matB = 0.5, rightDef = 50, finalLeft = 184, finalTop = 48;
+const titleData = ['Online for Free', 'Amazon','Website','Facebook'];
+const classData = ['yellow','magenta','green', 'sandy'];
+const imageUrls = ['https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide1_.jpg',
+'https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide2_.jpg',
+'https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide3_.jpg'
+];
+let titlePos = titleData[0].length;
+let direction = false;
+let titleIndex = 0;
+let timeId;
 class App extends React.Component {
 	constructor (props) {
 		super(props);
@@ -25,20 +47,59 @@ class App extends React.Component {
 			finalStyle: {
 				left: '184px',
     			top: '48%'
-			}	
+			},
+			titlePosState: titleData[0].length,
+			directionState: false,
+			titleIndexState: 0,
 		}
 	}
 	componentDidMount() {
 		window.addEventListener('scroll', (e) => this.handleScroll(e));
+		console.log(window.innerWidth, window.innerHeight);
+		// let titlePos = titleData.length;
+		// let direction = false;
+		timeId = setInterval(() => this.carpetFunc(), 80);
 	}
 
 	componentWillUnmount() {
 		window.removeEventListener('scroll', (e) => this.handleScroll(e));
 	}
 
+	carpetFunc () {
+		if (direction) {
+			this.setState({
+				titlePosState: ++titlePos,
+			});
+			if (titlePos > titleData[titleIndex % 4].length) {
+				direction = false;
+				this.setState({ directionState: false });
+				if (timeId) {
+					clearInterval(timeId);
+					setTimeout(() => {
+						timeId = setInterval(() => this.carpetFunc(), 80);
+					}, 1000);
+				}
+			}
+		} else {
+			this.setState({
+				titlePosState: --titlePos,
+			});
+			if (titlePos <= 0) {
+				direction = true;
+				this.setState({ directionState: true, titleIndexState: ++titleIndex });
+				if (timeId) {
+					clearInterval(timeId);
+					setTimeout(() => {
+						timeId = setInterval(() => this.carpetFunc(), 80);
+					}, 1000);
+				}
+			}
+		}
+	}
+
 	handleScroll(event) {
+		console.log(event);
 		let scrollTop = event.srcElement.body.scrollTop;
-		console.log(scrollTop);
 		this.setState({
 			style: {
 				marginTop: `-${(marginTop - window.pageYOffset / 15 ) > 0 ? parseInt(marginTop - window.pageYOffset / 15 ) : 0}px`,
@@ -55,10 +116,11 @@ class App extends React.Component {
     			top: `${(finalTop + window.pageYOffset / 8 ) < 150 ? parseInt(finalTop + window.pageYOffset / 8 ) : 150}%`
 			},
 		})
+		
 	}
 
    render() {
-	   const { style, desRight, rightBottom, phoneStyle, finalStyle } = this.state;
+	   const { style, desRight, rightBottom, phoneStyle, finalStyle, titlePosState, titleIndexState } = this.state;
 	  var myStyle1 = {
          marginTop:'10px'
       }
@@ -66,7 +128,6 @@ class App extends React.Component {
 		 height: '200px',
 	     background: '#aaa'
 	  }
-	  
       return (		   
 		<section className="calypso-block calypso-block--EW19-tile-1">
 			<div className="hpc-mobile-bg desktop-hidden"></div>
@@ -80,7 +141,12 @@ class App extends React.Component {
 								<span className="hpc-on" id="hpc_on"></span>  
 								<span className="hpc-underlined -line hpc-underlined--yellow" id="hpc_underlined">  
 								<span className="hpc-underlined__text">  
-									<span id="hpc_sales_channel">Online for Free</span> 
+									<span id="hpc_sales_channel">{titleIndexState % 4 !== 0 ? 'On ' : ''}</span>
+									<span className={`contain-caret ${titlePosState <= 0 ? 'none-visible' : classData[titleIndex % 4]}`} >
+										<span>
+											{titleData[titleIndexState % 4].substring(0, titlePosState)}
+										</span>
+									</span> 
 									<span className="hpc-caret hpc-caret--show hpc-caret--blink" id="hpc_caret"></span>  
 								</span>  
 								</span>
@@ -108,30 +174,46 @@ class App extends React.Component {
 							<div className="hpc-pics__phone hpc-animate hpc-animate--from-opacity hpc-animate--animated" style={phoneStyle}>
 								<div className="hpc-phone" id="hpc_phone">
 									<div className="hpc-phone__frame">
-										<div className="hpc-phone__slide hpc-phone__slide--current">  
+										<div className={`self-animation hpc-phone__slide hpc-phone__slide--current`}>  
 											<img className="hpc-phone__image" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide1_.jpg" alt="" />
 										</div>
-									</div>
+										<div className={`self-animation hpc-phone__slide hpc-phone__slide--next`}>  
+											<img className="hpc-phone__image" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/phone-slide2.jpg" alt="" />
+										</div>
+									</div> 
+
 									<div className="hpc-phone__cover"></div>
+									{/* <Slideshow className='below-phone'/> */}
 								</div>
-							</div>
+							</div> 
 							<div className="hpc-pics__tablet hpc-animate hpc-animate--from-opacity hpc-animate--delay-6 hpc-animate--animated" style={finalStyle}>
 								<div className="hpc-pics__glasses hpc-animate hpc-animate--delay-8 hpc-animate--animated">
 									<div className="hpc-glasses" id="hpc_glasses"></div>
 								</div>
 								<div className="hpc-tablet" id="hpc_tablet">
 									<div className="hpc-tablet__frame">
-									<div className="hpc-tablet__slide hpc-tablet__slide--next">  
-										<img className="hpc-tablet__image" alt="" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/tablet-slide6.jpg" />
-									</div>
-									<div className="hpc-tablet__slide hpc-tablet__slide--current">  
-										<img className="hpc-tablet__image" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/tablet-slide1.jpg" alt="" />
-									</div>
+										<div className="self-animation hpc-tablet__slide hpc-tablet__slide--current">  
+											<img className="hpc-tablet__image" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/tablet-slide6.jpg" />
+										</div>
+										<div className="self-animation hpc-tablet__slide hpc-tablet__slide--next">  
+											<img className="hpc-tablet__image" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/tablet-slide1.jpg" alt="" />
+										</div>
 									</div>
 									<div className="hpc-tablet__cover">
 
 									</div>
 								</div>
+							</div>
+						</div>
+						<div className="hpc-mobile-pics desktop-hidden">  
+							<div className='self-defined'></div>
+							<img className="hpc-mobile-pics__image hpc-mobile-pics__image--mobile tablet-hidden" id="hpc_mobile_single_slide" src="" alt=""/>  
+							<img className="hpc-mobile-pics__image hpc-mobile-pics__image--tablet tablet-visible" id="hpc_tablet_single_slide" src="https://don16obqbay2c.cloudfront.net/wp-content/themes/ecwid/images/hpc/mobile_single_slide@2x.png" alt=""/>
+							<div className="hpc-mobile-pics__title">
+								Your free online store is&nbsp;just a&nbsp;few clicks away
+							</div>
+							<div className="hpc-mobile-pics__text">
+								We’re putting free trials on&nbsp;trial. With Ecwid, you get free FOREVER. Set up&nbsp;your free account once, and&nbsp;keep it&nbsp;as&nbsp;long as&nbsp;you like. Seriously.
 							</div>
 						</div>
 					</div>
